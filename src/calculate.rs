@@ -1,4 +1,4 @@
-use std::ops::Add;
+use std::ops::Sub;
 
 use chrono::{Duration, NaiveDate};
 use chronoutil::shift_months;
@@ -79,7 +79,7 @@ pub fn calculate(
     let total_reduction_days = days_dp + days_arse;
     let incarceration_end_data_reducted =
         shift_months(incarceration_end_data, -(total_reduction_months as i32))
-            .add(Duration::days(total_reduction_days));
+            .sub(Duration::days(total_reduction_days));
 
     let mid_incarceration_end_data = shift_months(incarceration_start_date, month_ppl as i32 / 2);
 
@@ -87,7 +87,7 @@ pub fn calculate(
         mid_incarceration_end_data,
         -((total_reduction_months / 2) as i32),
     )
-    .add(Duration::days(total_reduction_days / 2));
+    .sub(Duration::days(total_reduction_days / 2));
     Result {
         incarceration_end_data,
         previsional_crp,
