@@ -7,6 +7,8 @@ pub struct InputComponentProps {
     pub onchange: Callback<Event>,
     pub itype: &'static str,
     pub name: &'static str,
+    pub value: Option<String>,
+    pub checked: Option<bool>,
 }
 
 pub struct InputComponent;
@@ -23,7 +25,11 @@ impl Component for InputComponent {
         html! {
             <div>
               <span>{ctx.props().name}</span>
-              <input onchange={&ctx.props().onchange} type={ctx.props().itype} />
+              if let Some(value) = ctx.props().value.as_ref() {
+                <input value={value.clone()} onchange={&ctx.props().onchange} type={ctx.props().itype} />
+              } else {
+                <input checked={ctx.props().checked.unwrap_or(false)} onchange={&ctx.props().onchange} type={ctx.props().itype} />
+              }
               <br />
             </div>
         }

@@ -3,6 +3,8 @@ use std::ops::Sub;
 use chrono::{Duration, NaiveDate};
 use chronoutil::shift_months;
 
+use crate::options::Options;
+
 #[derive(Debug)]
 pub struct Result {
     incarceration_end_data: NaiveDate,
@@ -68,10 +70,16 @@ pub fn calculate(
     end_dp: Option<NaiveDate>,
     start_arse: Option<NaiveDate>,
     end_arse: Option<NaiveDate>,
+    options: &Options,
 ) -> Result {
     let incarceration_end_data = shift_months(incarceration_start_date, month_ppl as i32);
-    let previsional_crp = 1 + 2 * (month_ppl / 12);
-    let previsional_rps = 3 * (month_ppl / 12);
+
+    let previsional_crp = if options.crp {
+        1 + 2 * (month_ppl / 12)
+    } else {
+        0
+    };
+    let previsional_rps = if options.rps { 3 * (month_ppl / 12) } else { 0 };
     let days_dp = get_days_between_dates(end_dp, start_dp);
     let days_arse = get_days_between_dates(end_arse, start_arse);
 
