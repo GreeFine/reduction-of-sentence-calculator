@@ -11,7 +11,7 @@ use yew::prelude::*;
 
 use crate::options::{Options, OptionsName};
 
-const DEFAULT_PPL: usize = 24;
+const DEFAULT_PPL: i64 = 24;
 
 #[function_component(App)]
 fn app() -> Html {

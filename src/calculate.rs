@@ -8,12 +8,11 @@ use crate::options::Options;
 #[derive(Debug)]
 pub struct Result {
     incarceration_end_data: NaiveDate,
-    previsional_crp: usize,
-    previsional_rps: usize,
-    days_dp: usize,
-    days_arse: usize,
-    total_reduction_months: usize,
-    total_reduction_days: usize,
+    previsional_crp_days: i64,
+    previsional_rps_days: i64,
+    days_dp: i64,
+    days_arse: i64,
+    total_reduction_days: i64,
     incarceration_end_data_reducted: NaiveDate,
     mid_incarceration_end_data: NaiveDate,
     mid_incarceration_end_data_reducted: NaiveDate,
@@ -26,8 +25,8 @@ impl Result {
                 "Date de fin d'incarceration",
                 self.incarceration_end_data.to_string(),
             ),
-            ("CRP Prévisible", self.previsional_crp.to_string()),
-            ("RPS Prévisible", self.previsional_rps.to_string()),
+            ("CRP Prévisible", self.previsional_crp_days.to_string()),
+            ("RPS Prévisible", self.previsional_rps_days.to_string()),
             ("Nombre de jours en DP", self.days_dp.to_string()),
             ("Nombre de jours en ARSE", self.days_arse.to_string()),
             (
@@ -38,10 +37,6 @@ impl Result {
             (
                 "Mi-Peine reduite",
                 self.mid_incarceration_end_data_reducted.to_string(),
-            ),
-            (
-                "total_reduction_months",
-                self.total_reduction_months.to_string(),
             ),
             (
                 "total_reduction_days",
@@ -65,7 +60,7 @@ fn get_days_between_dates(end: Option<NaiveDate>, start: Option<NaiveDate>) -> i
 
 pub fn calculate(
     incarceration_start_date: NaiveDate,
-    month_ppl: usize,
+    month_ppl: i64,
     start_dp: Option<NaiveDate>,
     end_dp: Option<NaiveDate>,
     start_arse: Option<NaiveDate>,
@@ -74,36 +69,50 @@ pub fn calculate(
 ) -> Result {
     let incarceration_end_data = shift_months(incarceration_start_date, month_ppl as i32);
 
-    let previsional_crp = if options.crp {
-        1 + 2 * (month_ppl / 12)
+    let previsional_crp_days: i64 = if options.crp {
+        if month_ppl >= 12 {
+            let months_of_uncomplete_year = month_ppl % 12;
+            // FIXME: 60 => 2 month? check with real dates
+            let caped_months_of_uncomplete_year = if (months_of_uncomplete_year * 7) >= 60 {
+                60
+            } else {
+                months_of_uncomplete_year
+            };
+            caped_months_of_uncomplete_year + ((month_ppl - months_of_uncomplete_year) * 7)
+        } else {
+            month_ppl * 7
+        }
     } else {
         0
     };
-    let previsional_rps = if options.rps { 3 * (month_ppl / 12) } else { 0 };
+    let previsional_rps_days = if options.rps {
+        // TODO: Manque les CRP previsible ?
+        let month_ppl_minus_crp = incarceration_end_data
+            .sub(Duration::days(previsional_crp_days as i64))
+            - incarceration_start_date;
+        // FIXME: here using 30 days for a month
+        (month_ppl_minus_crp.num_days() / 30) * 7
+    } else {
+        0
+    };
     let days_dp = get_days_between_dates(end_dp, start_dp);
     let days_arse = get_days_between_dates(end_arse, start_arse);
 
-    let total_reduction_months = previsional_crp + previsional_rps;
-    let total_reduction_days = days_dp + days_arse;
+    let total_reduction_days = previsional_crp_days + previsional_rps_days + days_dp + days_arse;
     let incarceration_end_data_reducted =
-        shift_months(incarceration_end_data, -(total_reduction_months as i32))
-            .sub(Duration::days(total_reduction_days));
+        incarceration_end_data.sub(Duration::days(total_reduction_days as i64));
 
     let mid_incarceration_end_data = shift_months(incarceration_start_date, month_ppl as i32 / 2);
 
-    let mid_incarceration_end_data_reducted = shift_months(
-        mid_incarceration_end_data,
-        -((total_reduction_months / 2) as i32),
-    )
-    .sub(Duration::days(total_reduction_days / 2));
+    let mid_incarceration_end_data_reducted =
+        mid_incarceration_end_data.sub(Duration::days(total_reduction_days / 2));
     Result {
         incarceration_end_data,
-        previsional_crp,
-        previsional_rps,
-        days_dp: days_dp as usize,
-        days_arse: days_arse as usize,
-        total_reduction_months,
-        total_reduction_days: total_reduction_days as usize,
+        previsional_crp_days,
+        previsional_rps_days,
+        days_dp,
+        days_arse,
+        total_reduction_days,
         incarceration_end_data_reducted,
         mid_incarceration_end_data,
         mid_incarceration_end_data_reducted,
