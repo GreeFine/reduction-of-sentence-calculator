@@ -13,6 +13,7 @@ pub struct Result {
     days_dp: i64,
     days_arse: i64,
     total_reduction_days: i64,
+    mid_previsional_rps_days: i64,
     mid_total_reduction_days: i64,
     incarceration_end_data_reducted: NaiveDate,
     mid_incarceration_end_data: NaiveDate,
@@ -34,14 +35,18 @@ impl Result {
                 "Date de fin d'incarceration peine reduite",
                 self.incarceration_end_data_reducted.to_string(),
             ),
+            (
+                "total_reduction_days",
+                self.total_reduction_days.to_string(),
+            ),
             ("Mi-Peine", self.mid_incarceration_end_data.to_string()),
             (
                 "Mi-Peine reduite",
                 self.mid_incarceration_end_data_reducted.to_string(),
             ),
             (
-                "total_reduction_days",
-                self.total_reduction_days.to_string(),
+                "mid_previsional_rps_days",
+                self.mid_previsional_rps_days.to_string(),
             ),
             (
                 "mid_total_reduction_days",
@@ -130,8 +135,9 @@ pub fn calculate(
         days_dp,
         days_arse,
         total_reduction_days,
-        mid_total_reduction_days,
         incarceration_end_data_reducted,
+        mid_total_reduction_days,
+        mid_previsional_rps_days,
         mid_incarceration_end_data,
         mid_incarceration_end_data_reducted,
     }
