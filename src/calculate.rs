@@ -13,6 +13,7 @@ pub struct Result {
     days_dp: i64,
     days_arse: i64,
     total_reduction_days: i64,
+    mid_total_reduction_days: i64,
     incarceration_end_data_reducted: NaiveDate,
     mid_incarceration_end_data: NaiveDate,
     mid_incarceration_end_data_reducted: NaiveDate,
@@ -42,6 +43,10 @@ impl Result {
                 "total_reduction_days",
                 self.total_reduction_days.to_string(),
             ),
+            (
+                "mid_total_reduction_days",
+                self.mid_total_reduction_days.to_string(),
+            ),
         ]
     }
 }
@@ -68,6 +73,7 @@ pub fn calculate(
     options: &Options,
 ) -> Result {
     let incarceration_end_data = shift_months(incarceration_start_date, month_ppl as i32);
+    let mid_incarceration_end_data = shift_months(incarceration_start_date, month_ppl as i32 / 2);
 
     let previsional_crp_days: i64 = if options.crp {
         if month_ppl >= 12 {
@@ -102,10 +108,21 @@ pub fn calculate(
     let incarceration_end_data_reducted =
         incarceration_end_data.sub(Duration::days(total_reduction_days as i64));
 
-    let mid_incarceration_end_data = shift_months(incarceration_start_date, month_ppl as i32 / 2);
+    let mid_previsional_rps_days = if options.rps {
+        // TODO: Manque les CRP previsible ?
+        let month_ppl_minus_crp = mid_incarceration_end_data
+            .sub(Duration::days(previsional_crp_days as i64))
+            - incarceration_start_date;
+        // FIXME: here using 30 days for a month
+        (month_ppl_minus_crp.num_days() / 30) * 7
+    } else {
+        0
+    };
+    let mid_total_reduction_days =
+        previsional_crp_days + mid_previsional_rps_days + days_dp + days_arse;
 
     let mid_incarceration_end_data_reducted =
-        mid_incarceration_end_data.sub(Duration::days(total_reduction_days / 2));
+        mid_incarceration_end_data.sub(Duration::days(mid_total_reduction_days / 2));
     Result {
         incarceration_end_data,
         previsional_crp_days,
@@ -113,6 +130,7 @@ pub fn calculate(
         days_dp,
         days_arse,
         total_reduction_days,
+        mid_total_reduction_days,
         incarceration_end_data_reducted,
         mid_incarceration_end_data,
         mid_incarceration_end_data_reducted,
