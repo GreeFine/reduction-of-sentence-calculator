@@ -28,8 +28,14 @@ fn app() -> Html {
         <h1>{ "Calculateur" }</h1>
         <div class="flex-row">
           <div>
-            <InputComponent itype="date" name="Debut incarceration: " onchange={date_selector_onchange(&incarceration_start_date)}  />
-            <InputComponent itype="number" name="Mois PPL: " onchange={number_selector_onchange(&selected_ppl)}  />
+            <InputComponent itype="date" name="Debut incarceration: " value={Some((*incarceration_start_date).unwrap().to_string())} onchange={date_selector_onchange(&incarceration_start_date)}  />
+            <div>
+              <span>{"Durée PPL"}</span>
+              <InputComponent itype="number" name="Mois: "
+              value={Some((*selected_ppl).to_string())} onchange={number_selector_onchange(&selected_ppl, None)}  />
+              <InputComponent itype="number" name="Années: "
+              value={Some((*selected_ppl / 24).to_string())} onchange={number_selector_onchange(&selected_ppl, Some(24))}  />
+            </div>
           </div>
           <div>
             <InputComponent itype="checkbox" checked={options.crp} name="CRP: " onchange={checkbox_selector_onchange(&options, OptionsName::Crp)}  />

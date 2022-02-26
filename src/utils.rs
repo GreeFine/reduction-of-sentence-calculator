@@ -15,11 +15,14 @@ pub fn date_selector_onchange(use_state: &UseStateHandle<Option<NaiveDate>>) -> 
     })
 }
 
-pub fn number_selector_onchange(use_state: &UseStateHandle<i64>) -> Callback<Event> {
+pub fn number_selector_onchange(
+    use_state: &UseStateHandle<i64>,
+    multiplier: Option<i64>,
+) -> Callback<Event> {
     let use_state = use_state.clone();
     Callback::from(move |e: Event| {
         let result = HtmlInputElement::from(JsValue::from(e.target().unwrap().value_of())).value();
-        use_state.set(result.parse::<i64>().unwrap());
+        use_state.set(result.parse::<i64>().unwrap() * multiplier.unwrap_or(0));
     })
 }
 
