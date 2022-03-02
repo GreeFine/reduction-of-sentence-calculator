@@ -38,18 +38,10 @@ fn app() -> Html {
             </div>
           </div>
           <div>
-            <div>
-              <InputComponent itype="number" name="CRP : "
-                  value={Some((*selected_ppl / ONE_YEAR).to_string())} onchange={number_selector_onchange(&selected_ppl, Some(24))}  />
-              <InputComponent itype="checkbox" checked={options.crp} name="CRP previsible: "
-                  onchange={checkbox_selector_onchange(&options, OptionsName::Crp)}  />
-            </div>
-            <div>
-              <InputComponent itype="number" name="RPS: "
-                  value={Some((*selected_ppl / ONE_YEAR).to_string())} onchange={number_selector_onchange(&selected_ppl, Some(24))}  />
-              <InputComponent itype="checkbox" checked={options.rps} name="RPS previsible: "
-                  onchange={checkbox_selector_onchange(&options, OptionsName::Rps)}  />
-            </div>
+            <InputComponent itype="checkbox" checked={options.crp} name="CRP previsible: "
+                onchange={checkbox_selector_onchange(&options, OptionsName::Crp)}  />
+            <InputComponent itype="checkbox" checked={options.rps} name="RPS previsible: "
+                onchange={checkbox_selector_onchange(&options, OptionsName::Rps)}  />
           </div>
           <div>
             <InputComponent itype="date" name="Debut Detention Provisoire: " onchange={date_selector_onchange(&start_dp)}  />
