@@ -22,7 +22,7 @@ pub fn number_selector_onchange(
     let use_state = use_state.clone();
     Callback::from(move |e: Event| {
         let result = HtmlInputElement::from(JsValue::from(e.target().unwrap().value_of())).value();
-        use_state.set(result.parse::<i64>().unwrap() * multiplier.unwrap_or(0));
+        use_state.set(result.parse::<i64>().unwrap() * multiplier.unwrap_or(1));
     })
 }
 
