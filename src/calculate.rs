@@ -68,8 +68,14 @@ fn get_days_between_dates(end: Option<NaiveDate>, start: Option<NaiveDate>) -> i
     }
 }
 
+fn split_months_days(days: i64) -> (i64, i64) {
+    let months = days / ONE_MONTH_DAYS;
+    (months, days - (months * ONE_MONTH_DAYS))
+}
+
+// FIXME: 30 => 1 month? check with real dates
 const ONE_MONTH_DAYS: i64 = 30;
-const FIRST_YEAR_CRP: i64 = 90;
+const ONE_YEAR_CRP: i64 = 90;
 const ONE_YEAR: i64 = 12;
 const REDUCTION_PER_MONTH: i64 = 7;
 
@@ -89,16 +95,8 @@ pub fn calculate(
         if month_ppl >= ONE_YEAR {
             let months_of_uncomplete_year = month_ppl % ONE_YEAR;
             let complete_years = month_ppl / ONE_YEAR;
-            // FIXME: 60 => 2 month? check with real dates
-            let caped_months_of_uncomplete_year =
-                if (months_of_uncomplete_year * REDUCTION_PER_MONTH) >= ONE_MONTH_DAYS * 2 {
-                    ONE_MONTH_DAYS * 2
-                } else {
-                    months_of_uncomplete_year * REDUCTION_PER_MONTH
-                };
-            caped_months_of_uncomplete_year
-                + ((complete_years - 1) * (ONE_MONTH_DAYS * 2))
-                + FIRST_YEAR_CRP
+
+            (complete_years * ONE_YEAR_CRP) + (months_of_uncomplete_year * REDUCTION_PER_MONTH)
         } else {
             month_ppl * REDUCTION_PER_MONTH
         }
@@ -106,11 +104,9 @@ pub fn calculate(
         0
     };
     let previsional_rps_days = if options.rps {
-        // TODO: Manque les CRP previsible ?
         let month_ppl_minus_crp = incarceration_end_data
             .sub(Duration::days(previsional_crp_days as i64))
             - incarceration_start_date;
-        // FIXME: here using 30 days for a month
         (month_ppl_minus_crp.num_days() / ONE_MONTH_DAYS) * REDUCTION_PER_MONTH
     } else {
         0
@@ -118,28 +114,23 @@ pub fn calculate(
     let days_dp = get_days_between_dates(end_dp, start_dp);
     let days_arse = get_days_between_dates(end_arse, start_arse);
 
-    let total_reduction_days = previsional_crp_days + previsional_rps_days + days_dp + days_arse;
-    let total_reduction_month = total_reduction_days / ONE_MONTH_DAYS;
-    let total_reduction_days = total_reduction_days - (total_reduction_month * ONE_MONTH_DAYS);
+    let (total_reduction_month, total_reduction_days) =
+        split_months_days(previsional_crp_days + previsional_rps_days + days_dp + days_arse);
     let incarceration_end_data_reducted =
         shift_months(incarceration_end_data, -total_reduction_month as i32)
             .sub(Duration::days(total_reduction_days as i64));
 
     let mid_previsional_rps_days = if options.rps {
-        // TODO: Manque les CRP previsible ?
         let month_ppl_minus_crp = mid_incarceration_end_data
             .sub(Duration::days(previsional_crp_days / 2))
             - incarceration_start_date;
-        // FIXME: here using 30 days for a month
         (month_ppl_minus_crp.num_days() / ONE_MONTH_DAYS) * REDUCTION_PER_MONTH
     } else {
         0
     };
-    let mid_total_reduction_days =
-        mid_previsional_rps_days + ((previsional_crp_days + days_dp + days_arse) / 2);
-    let mid_total_reduction_month = mid_total_reduction_days / ONE_MONTH_DAYS;
-    let mid_total_reduction_days =
-        mid_total_reduction_days - (mid_total_reduction_month * ONE_MONTH_DAYS);
+    let (mid_total_reduction_month, mid_total_reduction_days) = split_months_days(
+        mid_previsional_rps_days + ((previsional_crp_days + days_dp + days_arse) / 2),
+    );
     let mid_incarceration_end_data_reducted = shift_months(
         mid_incarceration_end_data,
         -mid_total_reduction_month as i32,
