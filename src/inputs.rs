@@ -6,7 +6,7 @@ pub struct InputComponentProps {
     #[prop_or_default]
     pub onchange: Callback<Event>,
     pub itype: &'static str,
-    pub name: &'static str,
+    pub name: Option<&'static str>,
     pub value: Option<String>,
     pub checked: Option<bool>,
 }
@@ -24,7 +24,9 @@ impl Component for InputComponent {
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
             <div>
-              <span>{ctx.props().name}</span>
+              if let Some(name) = ctx.props().name {
+                <span>{name}</span>
+              }
               if let Some(value) = ctx.props().value.as_ref() {
                 <input value={value.clone()} onchange={&ctx.props().onchange} type={ctx.props().itype} />
               } else {

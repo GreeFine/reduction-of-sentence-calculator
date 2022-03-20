@@ -4,6 +4,7 @@ pub struct Options {
     pub crp: bool,
 }
 
+#[allow(dead_code)]
 pub enum OptionsName {
     Rps,
     Crp,
