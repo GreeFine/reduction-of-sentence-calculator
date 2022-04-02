@@ -5,6 +5,7 @@ mod utils;
 
 use calculate::calculate;
 use chrono::NaiveDate;
+use chronoutil::shift_years;
 use inputs::InputComponent;
 use utils::*;
 use yew::prelude::*;
@@ -21,6 +22,13 @@ fn app() -> Html {
     let substracted_rps = use_state(|| 0);
     let detention_period_1 = use_state(|| [None, None]);
     let detention_period_2 = use_state(|| [None, None]);
+
+    let computed = calculate(
+        (*incarceration_start_date).unwrap(),
+        *selected_ppl,
+        *detention_period_1,
+        *detention_period_2,
+    );
 
     html! {
       <div class="App">
@@ -79,22 +87,84 @@ fn app() -> Html {
         <h1>{ "Résultats" }</h1>
         <div class="table">
           <div class="table-header">
-            <div class="header__item">{"Données"}</div>
+            <div class="header__item">{""}</div>
+            <div class="header__item">{"Aménagement probatoire"}</div>
+            <div class="header__item">{"Aménagement de peine (mi-peine)"}</div>
+            <div class="header__item">{"LSC"}</div>
+            <div class="header__item">{"Fin de peine"}</div>
           </div>
           <div class="table-content">
-            {
-              calculate((*incarceration_start_date).unwrap(), *selected_ppl,
-                        *detention_period_1, *detention_period_2).entries().iter().map(|entrie| {
-                          html!{
-                            <div key={entrie.0} class="table-row">
-                              <div class="table-data">{entrie.0}</div>
-                              <div class="table-data">
-                                <span>{&entrie.1}</span>
-                              </div>
-                            </div>
-                          }
-                        }).collect::<Html>()
-            }
+            <div class="table-row">
+              <div class="table-data">{"Date maximale"}</div>
+              <div class="table-data">{shift_years(computed.mid_incarceration_end_date, -1)}</div>
+              <div class="table-data">{computed.mid_incarceration_end_date}</div>
+              <div class="table-data">{"..."}</div>
+              <div class="table-data">{computed.incarceration_end_date}</div>
+            </div>
+            <div class="table-row">
+              <div class="table-data">{"Date prévisible (Déduction CRP et DP/ARSE)"}</div>
+              <div class="table-data">{shift_years(computed.mid_incarceration_end_date_reducted_minus_rps, -1)}</div>
+              <div class="table-data">{computed.mid_incarceration_end_date_reducted_minus_rps}</div>
+              <div class="table-data">{"..."}</div>
+              <div class="table-data">{computed.incarceration_end_date_reducted_minus_rps}</div>
+            </div>
+            <div class="table-row">
+              <div class="table-data">{"Date minimale (Déduction CRP, CP/ARSE, RPS)"}</div>
+              <div class="table-data">{shift_years(computed.mid_incarceration_end_date_reducted, -1)}</div>
+              <div class="table-data">{computed.mid_incarceration_end_date_reducted}</div>
+              <div class="table-data">{"..."}</div>
+              <div class="table-data">{computed.incarceration_end_date_reducted}</div>
+            </div>
+          </div>
+        </div>
+        <h1>{ "Données avancées" }</h1>
+        <div class="table">
+          <div class="table-header">
+            <div class="header__item">{""}</div>
+            <div class="header__item">{"Mois"}</div>
+            <div class="header__item">{"Jours"}</div>
+          </div>
+          <div class="table-content">
+            <div class="table-row">
+              <div class="table-data">{"Nombre de CRP prévisibles"}</div>
+              <div class="table-data">{computed.previsional_crp_days / 30}</div>
+              <div class="table-data">{computed.previsional_crp_days}</div>
+              </div>
+            <div class="table-row">
+              <div class="table-data">{"Nombre de CRP calculés"}</div>
+              <div class="table-data">{computed.previsional_crp_days / 30}</div>
+              <div class="table-data">{computed.previsional_crp_days}</div>
+              </div>
+            <div class="table-row">
+              <div class="table-data">{"Nombre de RPS prévisibles"}</div>
+              <div class="table-data">{computed.previsional_rps_days / 30}</div>
+              <div class="table-data">{computed.previsional_rps_days}</div>
+              </div>
+            <div class="table-row">
+              <div class="table-data">{"Nombre de RPS"}</div>
+              <div class="table-data">{computed.previsional_rps_days / 30}</div>
+              <div class="table-data">{computed.previsional_rps_days}</div>
+              </div>
+            <div class="table-row">
+              <div class="table-data">{"Durée de la DP/ARSE #1"}</div>
+              <div class="table-data">{computed.days_detention_period_1 / 30}</div>
+              <div class="table-data">{computed.days_detention_period_1}</div>
+              </div>
+            <div class="table-row">
+              <div class="table-data">{"Durée de la DP/ARSE #2"}</div>
+              <div class="table-data">{computed.days_detention_period_2 / 30}</div>
+              <div class="table-data">{computed.days_detention_period_2}</div>
+              </div>
+            <div class="table-row">
+              <div class="table-data">{"Total de réduction de peine (CRP/RPS)"}</div>
+              <div class="table-data">{computed.total_crp_rps / 30}</div>
+              <div class="table-data">{computed.total_crp_rps}</div>
+              </div>
+            <div class="table-row">
+              <div class="table-data">{"Total de toutes les déductions (CRP/RPS/DP-ARSE)"}</div>
+              <div class="table-data">{computed.total_crp_rps_detention / 30}</div>
+              <div class="table-data">{computed.total_crp_rps_detention}</div>
+              </div>
           </div>
         </div>
       </div>
