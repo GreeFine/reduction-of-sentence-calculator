@@ -1,9 +1,9 @@
-use chrono::NaiveDate;
+use chrono::{Datelike, NaiveDate};
 use gloo_console::__macro::JsValue;
 use web_sys::{Event, HtmlInputElement};
 use yew::{Callback, UseStateHandle};
 
-use crate::{Options, OptionsName};
+use crate::{Options, OptionsName, ONE_YEAR};
 
 pub fn date_selector_onchange(use_state: &UseStateHandle<Option<NaiveDate>>) -> Callback<Event> {
     let use_state = use_state.clone();
@@ -59,6 +59,20 @@ pub fn unwrap_or_empty_string(option: Option<impl ToString>) -> String {
         value.to_string()
     } else {
         "".to_string()
+    }
+}
+
+pub fn year_months_from_months(months: i64) -> (i64, i64) {
+    (months % ONE_YEAR, months / ONE_YEAR)
+}
+
+pub trait DateDisplay {
+    fn display_fr(&self) -> String;
+}
+
+impl DateDisplay for NaiveDate {
+    fn display_fr(&self) -> String {
+        format!("{} / {} / {}", self.day(), self.month(), self.year())
     }
 }
 

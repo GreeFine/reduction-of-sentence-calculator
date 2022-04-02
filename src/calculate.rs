@@ -3,7 +3,7 @@ use std::{cmp::min, ops::Sub};
 use chrono::{Duration, NaiveDate};
 use chronoutil::shift_months;
 
-use crate::utils::{Periode, PeriodsIntervals};
+use crate::utils::{year_months_from_months, Periode, PeriodsIntervals};
 
 #[derive(Debug)]
 pub struct Result {
@@ -48,6 +48,7 @@ fn split_months_days(days: i64) -> (i64, i64) {
 const ONE_MONTH_DAYS: i64 = 30;
 const ONE_YEAR_CRP: i64 = 60;
 const FIRST_YEAR_CRP: i64 = 90;
+const YEARS_RPS: i64 = 90;
 const ONE_YEAR: i64 = 12;
 const REDUCTION_PER_MONTH: i64 = 7;
 
@@ -64,8 +65,7 @@ pub fn calculate(
     let mid_incarceration_end_date = shift_months(incarceration_start_date, month_ppl as i32 / 2);
 
     let mut previsional_crp_days: i64 = if month_ppl >= ONE_YEAR {
-        let months_of_uncomplete_year = month_ppl % ONE_YEAR;
-        let complete_years = month_ppl / ONE_YEAR;
+        let (months_of_uncomplete_year, complete_years) = year_months_from_months(month_ppl);
 
         FIRST_YEAR_CRP
             + ((complete_years - 1) * ONE_YEAR_CRP)
@@ -78,13 +78,21 @@ pub fn calculate(
     };
     previsional_crp_days -= substracted_crp.unwrap_or_default() * ONE_MONTH_DAYS;
 
-    let month_ppl_minus_crp = incarceration_end_date
-        .sub(Duration::days(previsional_crp_days as i64))
+    let (splited_previsional_crp_month, splited_previsional_crp_days) =
+        split_months_days(previsional_crp_days);
+    let month_ppl_minus_crp = shift_months(
+        incarceration_end_date,
+        -splited_previsional_crp_month as i32,
+    )
+    .sub(Duration::days(splited_previsional_crp_days as i64))
         - incarceration_start_date;
     let previsional_rps_days = if let Some(month) = manual_rps {
         month * ONE_MONTH_DAYS
     } else {
-        (month_ppl_minus_crp.num_days() / ONE_MONTH_DAYS) * REDUCTION_PER_MONTH
+        let (months_of_uncomplete_year, complete_years) =
+            year_months_from_months(month_ppl_minus_crp.num_days() / ONE_MONTH_DAYS);
+
+        (months_of_uncomplete_year * REDUCTION_PER_MONTH) + (complete_years * YEARS_RPS)
     };
 
     let days_detention_period_1 = get_days_between_dates(detention_period_1);

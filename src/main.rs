@@ -100,24 +100,24 @@ fn app() -> Html {
           <div class="table-content">
             <div class="table-row">
               <div class="table-data">{"Date maximale"}</div>
-              <div class="table-data">{shift_years(computed.mid_incarceration_end_date, -1)}</div>
-              <div class="table-data">{computed.mid_incarceration_end_date}</div>
+              <div class="table-data">{shift_years(computed.mid_incarceration_end_date, -1).display_fr()}</div>
+              <div class="table-data">{computed.mid_incarceration_end_date.display_fr()}</div>
               <div class="table-data">{"..."}</div>
-              <div class="table-data">{computed.incarceration_end_date}</div>
+              <div class="table-data">{computed.incarceration_end_date.display_fr()}</div>
             </div>
             <div class="table-row">
               <div class="table-data">{"Date prévisible (Déduction CRP et DP/ARSE)"}</div>
-              <div class="table-data">{shift_years(computed.mid_incarceration_end_date_reducted_minus_rps, -1)}</div>
-              <div class="table-data">{computed.mid_incarceration_end_date_reducted_minus_rps}</div>
+              <div class="table-data">{shift_years(computed.mid_incarceration_end_date_reducted_minus_rps, -1).display_fr()}</div>
+              <div class="table-data">{computed.mid_incarceration_end_date_reducted_minus_rps.display_fr()}</div>
               <div class="table-data">{"..."}</div>
-              <div class="table-data">{computed.incarceration_end_date_reducted_minus_rps}</div>
+              <div class="table-data">{computed.incarceration_end_date_reducted_minus_rps.display_fr()}</div>
             </div>
             <div class="table-row">
               <div class="table-data">{"Date minimale (Déduction CRP, CP/ARSE, RPS)"}</div>
-              <div class="table-data">{shift_years(computed.mid_incarceration_end_date_reducted, -1)}</div>
-              <div class="table-data">{computed.mid_incarceration_end_date_reducted}</div>
+              <div class="table-data">{shift_years(computed.mid_incarceration_end_date_reducted, -1).display_fr()}</div>
+              <div class="table-data">{computed.mid_incarceration_end_date_reducted.display_fr()}</div>
               <div class="table-data">{"..."}</div>
-              <div class="table-data">{computed.incarceration_end_date_reducted}</div>
+              <div class="table-data">{computed.incarceration_end_date_reducted.display_fr()}</div>
             </div>
           </div>
         </div>
