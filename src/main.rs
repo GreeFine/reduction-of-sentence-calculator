@@ -17,9 +17,9 @@ const ONE_YEAR: i64 = 12;
 #[function_component(App)]
 fn app() -> Html {
     let incarceration_start_date = use_state(|| Some(NaiveDate::from_ymd(2022, 1, 1)));
-    let selected_ppl = use_state(|| DEFAULT_PPL);
-    let substracted_crp = use_state(|| 0);
-    let substracted_rps = use_state(|| 0);
+    let selected_ppl = use_state(|| Some(DEFAULT_PPL));
+    let substracted_crp = use_state(|| None);
+    let manual_rps = use_state(|| None);
     let detention_period_1 = use_state(|| [None, None]);
     let detention_period_2 = use_state(|| [None, None]);
 
@@ -28,8 +28,12 @@ fn app() -> Html {
         *selected_ppl,
         *detention_period_1,
         *detention_period_2,
+        *substracted_crp,
+        *manual_rps,
     );
 
+    let substracted_crp_html_val = unwrap_or_empty_string(*substracted_crp);
+    let manual_rps_html_val = unwrap_or_empty_string(*manual_rps);
     html! {
       <div class="App">
         <h1>{ "Calculateur de réductions de peine" }</h1>
@@ -49,9 +53,9 @@ fn app() -> Html {
               <div class="table-data">{"Durée de la peine"}</div>
               <div class="table-data">
                 <InputComponent itype="number" name="Mois: "
-                  value={Some((*selected_ppl).to_string())} onchange={number_selector_onchange(&selected_ppl, None)}  />
+                  value={Some(selected_ppl.unwrap_or_default().to_string())} onchange={number_selector_onchange(&selected_ppl, None)}  />
                 <InputComponent itype="number" name="Années: "
-                  value={Some((*selected_ppl / ONE_YEAR).to_string())} onchange={number_selector_onchange(&selected_ppl, Some(ONE_YEAR))}  />
+                  value={Some((selected_ppl.unwrap_or_default() / ONE_YEAR).to_string())} onchange={number_selector_onchange(&selected_ppl, Some(ONE_YEAR))}  />
               </div>
             </div>
             <div class="table-row">
@@ -72,14 +76,14 @@ fn app() -> Html {
               <div class="table-data">{"CRP"}</div>
               <div class="table-data">
                 <InputComponent itype="number" name="Mois retiré: "
-                  value={Some((*substracted_crp).to_string())} onchange={number_selector_onchange(&substracted_crp, None)}  />
+                  value={substracted_crp_html_val} onchange={number_selector_onchange(&substracted_crp, None)}  />
               </div>
             </div>
             <div class="table-row">
               <div class="table-data">{"RPS"}</div>
               <div class="table-data">
-                <InputComponent itype="number" name="Mois retiré: "
-                  value={Some((*substracted_rps).to_string())} onchange={number_selector_onchange(&substracted_rps, None)}  />
+                <InputComponent itype="number" name="Mois donné: "
+                  value={manual_rps_html_val} onchange={number_selector_onchange(&manual_rps, None)}  />
               </div>
             </div>
           </div>

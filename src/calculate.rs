@@ -53,14 +53,17 @@ const REDUCTION_PER_MONTH: i64 = 7;
 
 pub fn calculate(
     incarceration_start_date: NaiveDate,
-    month_ppl: i64,
+    month_ppl: Option<i64>,
     detention_period_1: Periode,
     detention_period_2: Periode,
+    substracted_crp: Option<i64>,
+    manual_rps: Option<i64>,
 ) -> Result {
+    let month_ppl = month_ppl.unwrap_or_default();
     let incarceration_end_date = shift_months(incarceration_start_date, month_ppl as i32);
     let mid_incarceration_end_date = shift_months(incarceration_start_date, month_ppl as i32 / 2);
 
-    let previsional_crp_days: i64 = if month_ppl >= ONE_YEAR {
+    let mut previsional_crp_days: i64 = if month_ppl >= ONE_YEAR {
         let months_of_uncomplete_year = month_ppl % ONE_YEAR;
         let complete_years = month_ppl / ONE_YEAR;
 
@@ -73,12 +76,16 @@ pub fn calculate(
     } else {
         month_ppl * REDUCTION_PER_MONTH
     };
+    previsional_crp_days -= substracted_crp.unwrap_or_default() * ONE_MONTH_DAYS;
 
     let month_ppl_minus_crp = incarceration_end_date
         .sub(Duration::days(previsional_crp_days as i64))
         - incarceration_start_date;
-    let previsional_rps_days =
-        (month_ppl_minus_crp.num_days() / ONE_MONTH_DAYS) * REDUCTION_PER_MONTH;
+    let previsional_rps_days = if let Some(month) = manual_rps {
+        month * ONE_MONTH_DAYS
+    } else {
+        (month_ppl_minus_crp.num_days() / ONE_MONTH_DAYS) * REDUCTION_PER_MONTH
+    };
 
     let days_detention_period_1 = get_days_between_dates(detention_period_1);
     let days_detention_period_2 = get_days_between_dates(detention_period_2);

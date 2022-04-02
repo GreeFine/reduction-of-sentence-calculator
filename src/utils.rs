@@ -40,14 +40,26 @@ pub fn periode_selector_onchange(
 }
 
 pub fn number_selector_onchange(
-    use_state: &UseStateHandle<i64>,
+    use_state: &UseStateHandle<Option<i64>>,
     multiplier: Option<i64>,
 ) -> Callback<Event> {
     let use_state = use_state.clone();
     Callback::from(move |e: Event| {
         let result = HtmlInputElement::from(JsValue::from(e.target().unwrap().value_of())).value();
-        use_state.set(result.parse::<i64>().unwrap() * multiplier.unwrap_or(1));
+        use_state.set(if result.is_empty() {
+            None
+        } else {
+            Some(result.parse::<i64>().unwrap() * multiplier.unwrap_or(1))
+        });
     })
+}
+
+pub fn unwrap_or_empty_string(option: Option<impl ToString>) -> String {
+    if let Some(value) = option {
+        value.to_string()
+    } else {
+        "".to_string()
+    }
 }
 
 #[allow(dead_code)]
