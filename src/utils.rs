@@ -29,10 +29,13 @@ pub fn periode_selector_onchange(
     let use_state = use_state.clone();
     Callback::from(move |e: Event| {
         let result = HtmlInputElement::from(JsValue::from(e.target().unwrap().value_of())).value();
-        use_state.set([
-            (*use_state)[end_or_start as usize],
-            Some(NaiveDate::parse_from_str(&result, "%Y-%m-%d").unwrap()),
-        ]);
+        let mut state = *use_state;
+        state[end_or_start as usize] = if result.is_empty() {
+            None
+        } else {
+            Some(NaiveDate::parse_from_str(&result, "%Y-%m-%d").unwrap())
+        };
+        use_state.set(state);
     })
 }
 
