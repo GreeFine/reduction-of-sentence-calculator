@@ -3,7 +3,7 @@ use gloo_console::__macro::JsValue;
 use web_sys::{Event, HtmlInputElement};
 use yew::{Callback, UseStateHandle};
 
-use crate::{Options, OptionsName, ONE_YEAR};
+use crate::{config::ONE_YEAR, Options, OptionsName};
 
 pub fn date_selector_onchange(use_state: &UseStateHandle<Option<NaiveDate>>) -> Callback<Event> {
     let use_state = use_state.clone();

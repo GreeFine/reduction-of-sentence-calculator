@@ -62,7 +62,6 @@ h3 {
 	display:flex;
 	width:100%;
 	padding: 12px 0px;
-  justify-content: space-between;
 }
 
 .table-content > div:nth-of-type(odd) { 
@@ -73,10 +72,18 @@ h3 {
   display: flex;
 	flex: 1 1 20%;
 	text-align: center;
-  justify-content: space-around;
+  margin: 0 1rem;
   flex-direction: row;
-  ;
 }
+
+.center > .table-data {
+  justify-content: space-around;
+}
+
+.left {
+  justify-content: left !important;
+}
+
 
 .header__item {
 	text-transform:uppercase;
