@@ -1,0 +1,12 @@
+{
+  "name": "calc-wasm",
+  "version": "0.1.0",
+  "files": [
+    "calc_wasm_bg.wasm",
+    "calc_wasm.js",
+    "calc_wasm.d.ts"
+  ],
+  "module": "calc_wasm.js",
+  "types": "calc_wasm.d.ts",
+  "sideEffects": false
+}
